@@ -42,6 +42,9 @@ object S3  {
  */
 class AWSWrapper(val awsBucket: String, S3Client: AmazonS3Client = S3.client)
                 (implicit ec: ExecutionContext, logger: LoggingAdapter) {
+
+  require(ec != null, "Execution context was null!")
+
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   implicit val adapter: LoggingAdapter = Logging(system, "AWSWrapper")

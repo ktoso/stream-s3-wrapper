@@ -33,6 +33,9 @@ import scala.util.{Try, Failure, Success}
  */
 class S3UploadFlow(s3Client: AmazonS3Client, bucket: String, key: String, logger: LoggingAdapter)
                   (implicit ec: ExecutionContext) extends GraphStage[FlowShape[ByteString, UploadPartResult]] {
+
+  require(ec != null, "Execution context was null!")
+
   val in: Inlet[ByteString] = Inlet("S3UploadFlow.in")
   val out: Outlet[UploadPartResult] = Outlet("S3UploadFlow.out")
   override val shape: FlowShape[ByteString, UploadPartResult] = FlowShape(in, out)
@@ -86,7 +89,10 @@ class S3UploadFlow(s3Client: AmazonS3Client, bucket: String, key: String, logger
 
           if (buffer.length > MinUploadChunkSize) {
             val uploadFuture = uploadBuffer(callback)
-            uploadFuture.onComplete(onAsyncInput)
+            uploadFuture.onComplete({ trying =>
+              onAsyncInput(trying)
+            })
+//            })(scala.concurrent.ExecutionContext.Implicits.global)
           }
           pushAndPull()
         }
@@ -186,7 +192,6 @@ class S3UploadFlow(s3Client: AmazonS3Client, bucket: String, key: String, logger
         if (multipartUpload.isEmpty) {
           Future.failed(new AWSException("Could not initiate multipart upload"))
         } else {
-          println("uploadBuffer")
           chunkMap(partNumber) = UploadChunk(partNumber, buffer, UploadStarted, None)
           val uploadFuture = uploadPartToAmazon(buffer, partNumber, multipartUpload.get.getUploadId, bucket, key)
           partNumber += 1

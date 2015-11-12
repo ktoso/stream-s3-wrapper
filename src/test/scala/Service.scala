@@ -21,10 +21,9 @@ trait Service {
   implicit val materializer: ActorMaterializer
   implicit val logger: LoggingAdapter
 
-  val aws = new AWSWrapper( "com.3dr.publictest")
+  lazy val aws = new AWSWrapper( "com.3dr.publictest")
 
-
-  val routes = pathPrefix("upload") {
+  lazy val routes = pathPrefix("upload") {
     post {
       extractRequest { request =>
         val resultFuture = request.entity.dataBytes

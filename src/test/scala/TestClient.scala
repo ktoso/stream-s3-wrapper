@@ -21,7 +21,7 @@ object TestClient extends App {
   val logger = Logging(system, getClass)
 
 
-  val file = new File("/Users/jasonmartens/Downloads/Star wars.mp4")
+  val file = new File("/Users/ktoso/Movies/Data Center Computers - Modern Challenges in CPU Design-QBu2Ae8-8LM.mp4")
   logger.info(s"Reading file of size: ${file.length()}")
   val imageSource = SynchronousFileSource(file)
   val entity = HttpEntity.Chunked.fromData(ContentTypes.`application/octet-stream`, imageSource)
@@ -30,4 +30,7 @@ object TestClient extends App {
   // TODO: How to cleanly shutdown system after stream completes?
   val result = Await.result(responseFuture, 1 hour)
   logger.info(s"Result: $result")
+
+  readLine("?")
+  system.terminate()
 }

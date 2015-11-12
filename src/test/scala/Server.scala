@@ -16,4 +16,7 @@ object Server extends App with Service {
   override val logger = Logging(system, getClass)
 
   Http().bindAndHandle(routes, "0.0.0.0", 9090)
+
+  readLine()
+  system.terminate()
 }
